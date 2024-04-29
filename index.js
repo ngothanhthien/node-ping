@@ -8,9 +8,13 @@ const MAX_TRIES = 4
 const DISCORD_WEBHOOK_URL = ''
 const DEBUG = false
 
+/*
+    @param {string} domain
+    @returns {Promise<{ domain: string, status: boolean }>}
+ */
 async function customPing(domain) {
     try {
-        let res = await awaitWithTimout(await ping.promise.probe(domain))
+        let res = await awaitWithTimout(await ping.promise.probe(domain), TIMEOUT)
         const { alive, time } = res
         return { domain, status: alive && time < TIMEOUT }
     } catch (error) {
@@ -19,6 +23,10 @@ async function customPing(domain) {
     }
 }
 
+/*
+    @param {string} errorMessage
+    @returns {Promise<void>}
+ */
 async function logErrorToDiscord(errorMessage) {
     if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL === '') {
         console.error('No Discord webhook URL provided')
@@ -34,6 +42,10 @@ async function logErrorToDiscord(errorMessage) {
     }
 }
 
+/*
+    @param {Promise<any>} promise
+    @param {number} ms
+ */
 async function awaitWithTimout(promise, ms) {
     return await Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject('Timeout'), ms))])
 }
